@@ -1,1 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATS Genius - AI Resume Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes progress-flow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        .animate-progress {
+            animation: progress-flow 2s infinite linear;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans min-h-screen">
 
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 p-2 rounded-lg">
+                <i class="fas fa-microchip text-white text-xl"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight">ATS <span class="text-indigo-600">Genius</span></span>
+        </div>
+        <div class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#" class="hover:text-indigo-600 transition-colors">Analyzer</a>
+            <a href="#" class="hover:text-indigo-600 transition-colors">Skill Gap</a>
+            <button class="bg-slate-900 text-white px-5 py-2 rounded-full hover:bg-slate-800 transition-all shadow-md">
+                Upgrade to Pro
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <!-- Hero Section -->
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+                Master the Algorithm with <span class="text-indigo-600">Gemini AI</span>
+            </h1>
+            <p class="text-lg text-slate-600 leading-relaxed">
+                Our advanced Applicant Tracking System uses Generative AI to decode job descriptions and optimize your resume for maximum impact.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Column: Inputs (5/12) -->
+            <div class="lg:col-span-5 space-y-6">
+                <!-- Step 1: File Upload -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">1</div>
+                        <h2 class="text-xl font-bold text-slate-800">Resume Upload</h2>
+                    </div>
+                    
+                    <div id="drop-zone" class="relative border-2 border-dashed border-slate-300 rounded-xl p-8 transition-all text-center hover:border-indigo-400 bg-slate-50/50 group">
+                        <input type="file" id="file-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf">
+                        <div id="upload-content">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 mx-auto shadow-sm group-hover:scale-110 transition-transform">
+                                <i class="fas fa-cloud-upload-alt text-slate-400 text-2xl group-hover:text-indigo-500"></i>
+                            </div>
+                            <p class="text-slate-700 font-semibold">Drop your PDF here</p>
+                            <p class="text-slate-400 text-sm mt-1">or click to browse files (Max 10MB)</p>
+                        </div>
+                        <div id="file-selected" class="hidden text-emerald-600">
+                            <i class="fas fa-check-circle text-4xl mb-3"></i>
+                            <p id="file-name" class="font-bold truncate px-4"></p>
+                            <button onclick="resetFile()" class="text-xs text-slate-500 mt-2 hover:underline">Remove file</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: JD Input -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-sm">2</div>
+                        <h2 class="text-xl font-bold text-slate-800">Job Description</h2>
+                    </div>
+                    <textarea id="jd-input" rows="8" 
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none text-slate-700 placeholder:text-slate-400"
+                        placeholder="Paste the full job description here..."></textarea>
+                </div>
+
+                <button id="analyze-btn" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-bolt"></i>
+                    Analyze with Gemini AI
+                </button>
+            </div>
+
+            <!-- Right Column: Results (7/12) -->
+            <div class="lg:col-span-7">
+                <!-- Initial Empty State -->
+                <div id="empty-state" class="bg-white rounded-3xl border border-slate-200 p-12 text-center h-full flex flex-col items-center justify-center min-h-[600px]">
+                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-8">
+                        <i class="fas fa-chart-pie text-slate-300 text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-400">Ready for Analysis</h3>
+                    <p class="text-slate-400 mt-3 max-w-sm mx-auto leading-relaxed">
+                        Once you upload your data, our AI will calculate your match percentage and provide strategic feedback.
+                    </p>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loading-state" class="hidden bg-white rounded-3xl border border-slate-200 p-12 h-full flex flex-col items-center justify-center min-h-[600px] space-y-6">
+                    <div class="relative w-32 h-32">
+                        <div class="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <i class="fas fa-brain text-indigo-600 text-3xl animate-pulse"></i>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-slate-800">AI Reasoning in Progress</h3>
+                        <p class="text-slate-500 mt-2">Gemini is parsing document structure and extracting key entities...</p>
+                    </div>
+                    <div class="w-full max-w-xs bg-slate-100 h-2 rounded-full overflow-hidden relative">
+                        <div class="bg-indigo-600 h-full w-1/2 absolute animate-progress rounded-full"></div>
+                    </div>
+                </div>
+
+                <!-- Results State -->
+                <div id="results-state" class="hidden space-y-6">
+                    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
+                        <!-- Score Banner -->
+                        <div class="bg-gradient-to-r from-indigo-600 to-violet-700 p-8 text-white flex flex-col md:flex-row items-center justify-between gap-8">
+                            <div>
+                                <h3 class="text-indigo-100 font-bold uppercase tracking-widest text-xs mb-2">Analysis Complete</h3>
+                                <div class="flex items-baseline gap-3">
+                                    <span class="text-7xl font-black">88<span class="text-3xl">%</span></span>
+                                    <div class="bg-white/20 px-3 py-1 rounded-full text-sm font-bold backdrop-blur-sm">Strong Fit</div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="text-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-1 backdrop-blur-sm border border-white/20">
+                                        <i class="fas fa-check text-xl"></i>
+                                    </div>
+                                    <span class="text-[10px] uppercase font-bold text-indigo-100">Skills</span>
+                                </div>
+                                <div class="text-center">
+                                    <div class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-1 backdrop-blur-sm border border-white/20">
+                                        <i class="fas fa-history text-xl"></i>
+                                    </div>
+                                    <span class="text-[10px] uppercase font-bold text-indigo-100">Exp</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skill Comparison -->
+                        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8 bg-white">
+                            <div>
+                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    Matching Skills
+                                </h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Python</span>
+                                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">NLP</span>
+                                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Rest API</span>
+                                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">Flask</span>
+                                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-100">GenAI</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    Missing Skills
+                                </h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg border border-rose-100">Docker</span>
+                                    <span class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg border border-rose-100">Cloud (AWS)</span>
+                                    <span class="px-3 py-1.5 bg-rose-50 text-rose-700 text-xs font-bold rounded-lg border border-rose-100">Redis</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Feedback Section -->
+                        <div class="p-8 bg-slate-50 border-t border-slate-100">
+                            <h4 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                                <i class="fas fa-lightbulb text-amber-500"></i>
+                                AI Strategic Feedback
+                            </h4>
+                            <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4">
+                                    <div class="mt-1"><i class="fas fa-arrow-up text-indigo-500"></i></div>
+                                    <p class="text-slate-600 text-sm italic">"The candidate has strong Python/NLP credentials but should explicitly mention deployment experience to bridge the DevOps gap."</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4">
+                                    <div class="mt-1"><i class="fas fa-plus text-emerald-500"></i></div>
+                                    <p class="text-slate-600 text-sm">Quantify your API experience. Mention the scale of requests handled or specific performance improvements (e.g., 'Optimized response time by 30%').</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="p-6 bg-white flex justify-between items-center border-t border-slate-100">
+                            <button class="text-slate-500 hover:text-indigo-600 font-bold text-sm flex items-center gap-2 transition-colors">
+                                <i class="fas fa-download"></i> Download Report (JSON)
+                            </button>
+                            <button onclick="location.reload()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-full font-bold text-sm transition-all">
+                                Analyze New Resume
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const dropZone = document.getElementById('drop-zone');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const emptyState = document.getElementById('empty-state');
+        const loadingState = document.getElementById('loading-state');
+        const resultsState = document.getElementById('results-state');
+        const jdInput = document.getElementById('jd-input');
+
+        // File Selection Logic
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                showSelectedFile(this.files[0].name);
+            }
+        });
+
+        function showSelectedFile(name) {
+            document.getElementById('upload-content').classList.add('hidden');
+            document.getElementById('file-selected').classList.remove('hidden');
+            document.getElementById('file-name').innerText = name;
+            dropZone.classList.add('bg-emerald-50', 'border-emerald-500');
+        }
+
+        function resetFile() {
+            fileInput.value = '';
+            document.getElementById('upload-content').classList.remove('hidden');
+            document.getElementById('file-selected').classList.add('hidden');
+            dropZone.classList.remove('bg-emerald-50', 'border-emerald-500');
+        }
+
+        // Analysis Simulation
+        analyzeBtn.addEventListener('click', () => {
+            if (!fileInput.files[0] || !jdInput.value.trim()) {
+                alert("Please upload a resume and paste the job description.");
+                return;
+            }
+
+            // UI Transitions
+            emptyState.classList.add('hidden');
+            resultsState.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+            
+            // Mock API Delay
+            setTimeout(() => {
+                loadingState.classList.add('hidden');
+                resultsState.classList.remove('hidden');
+            }, 3000);
+        });
+
+        // Drag and Drop Visuals
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-indigo-600', 'bg-indigo-50');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-indigo-600', 'bg-indigo-50');
+            });
+        });
+    </script>
+</body>
+</html>
